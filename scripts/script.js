@@ -17,12 +17,31 @@ https://www.googleapis.com/fusiontables/v1/query?sql=SELECT+*+FROM+1Fdf_ij_1hwRY
 function drawChart(trezData){
 	//Data formatter
 	dataArray = [];
+	dataHeaders = ['Date','Treasury Rate'];
+	dataArray.push(dataHeaders);
 	dataObj = trezData.rows;
-	console.log(dataObj);
 	//Iterator will format each row
 	for(var i=0;i<dataObj.length;i++){
+		currObj = dataObj[i];
+		//Momment.js will change the date string to an actual date, which is better for manipulation
+		currDate = currObj[0];
+		momDate = moment(currDate);
+		newDate = momDate._d;
 		
+		//Takes the value from each row
+		newVal = currObj[1];
+		
+		//Creates formatted array to use with the Google charting library
+		newArray = [newDate,newVal];
+		dataArray.push(newArray);
 	}
+	var data = google.visualization.arrayToDataTable(dataArray);
+	var options = {
+          title: '10-year Treasury Rate'
+        };
+	var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+
 }
 
 //getData is fired when the Google Viz library is loaded. It will get the data and call a function to draw the chart
