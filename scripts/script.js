@@ -13,6 +13,13 @@ https://www.googleapis.com/fusiontables/v1/query?sql=SELECT+*+FROM+1Fdf_ij_1hwRY
 * 3. Create function to handle data parsing and displaying
 */
 
+//GLOBAL VARIABLES
+//Used for sending URLs of custom Fusion Tables in Ajax get reuqests
+var dataURL = 'https://www.googleapis.com/fusiontables/v1/query?sql=SELECT+*+FROM+1Fdf_ij_1hwRYnNXlPVscHKopJjA5IgbnrkyCY6ED+WHERE+DATE>='
+var dataKey = '&key=AIzaSyB-QJux9WIJmey5IJYzPImNzg-xP1gpvU8'
+var strYr = '1960';
+var endYr = '2014';
+
 //drawChart function formats the data and draws the chart
 function drawChart(trezData) {
 	//Data formatter
@@ -37,7 +44,7 @@ function drawChart(trezData) {
 		dataArray.push(newArray);
 	}
 	var data = google.visualization.arrayToDataTable(dataArray);
-	
+
 	//These two formats format how the data is displayed in the tooltips
 	var formatDate = new google.visualization.DateFormat({
 		pattern : 'MMMM, y'
@@ -75,9 +82,26 @@ function drawChart(trezData) {
 
 }
 
+
+// clickHandler asks for different data based on the button that is clicked
+function clickHandler(e){
+	var parID = $(this).parent().attr('id');
+	var tarID = e.target.id;
+	if (parID == 'strbtn'){
+		var strYr = tarID.split("_")[1];
+		console.log(strYr);
+	}
+	if (parID == 'endbtn'){
+		var endYr = tarID.split("_")[1];
+		console.log(endYr);
+	}
+	$.getJSON(dataURL+strYr+'+AND+DATE<='+endYr+dataKey, drawChart);
+}
+
 //getData is fired when the Google Viz library is loaded. It will get the data and call a function to draw the chart
 function getData() {
-	$.getJSON('https://www.googleapis.com/fusiontables/v1/query?sql=SELECT+*+FROM+1Fdf_ij_1hwRYnNXlPVscHKopJjA5IgbnrkyCY6ED&key=AIzaSyB-QJux9WIJmey5IJYzPImNzg-xP1gpvU8', drawChart)
+	$.getJSON('https://www.googleapis.com/fusiontables/v1/query?sql=SELECT+*+FROM+1Fdf_ij_1hwRYnNXlPVscHKopJjA5IgbnrkyCY6ED&key=AIzaSyB-QJux9WIJmey5IJYzPImNzg-xP1gpvU8', drawChart);
+	$(".btn").on("click",clickHandler);
 }
 
 //loadGoog is fired when everything is loaded and loads the Google Viz library
