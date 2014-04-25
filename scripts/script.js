@@ -28,8 +28,23 @@ function loadGoog() {
 
 //getData is fired when the Google Viz library is loaded. It will get the data and call a function to draw the chart
 function getData() {
-	var defaultDate = '1960';
+	var defaultDate = '';
+	
+	//History.js will handle the startyear and endyear
+	var urlString = History.getState().cleanUrl;
+	var queryString = urlString.split("?")[1];
+	
 	//var defaultEnd = '2014';
+	
+	//If there is no query string, the start date will default to 1962; otherwise, it will use the year in the query string
+	if (!queryString){
+		defaultDate = '1962';	
+		console.log('no query string')
+	} else {		
+		var urlDate = queryString.split("=")[1];
+		defaultDate = urlDate;
+	}
+	
 	
 	$(".btn").on("click",clickHandler);
 	
@@ -49,6 +64,12 @@ function clickHandler(e){
 	//	var endYr = endID.split("_")[1];
 	//}
 	$.get(dataURL+dateString+"-01-01'"+dataKey, drawChart, 'json');
+	
+	//History.js for custom URLs
+	History.pushState({startyear:1}, "10-Year Treasury Constant Maturity Rate | "+dateString+" - 2014", "?startyear="+dateString);
+	
+	//Update h2 html
+	$("#startTitle").html(dateString);
 }
 
 //drawChart function formats the data and draws the chart
@@ -109,11 +130,10 @@ function drawChart(trezData) {
 			},
 			format : '##%'
 		},
-		height : 420
+		height : 440
 	};
 	var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 	chart.draw(data, options);
-
 }
 
 //When everything is loaded, this function sets the script in motion by calling certain functions
