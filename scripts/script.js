@@ -15,8 +15,41 @@ https://www.googleapis.com/fusiontables/v1/query?sql=SELECT+*+FROM+1Fdf_ij_1hwRY
 
 //GLOBAL VARIABLES
 //Used for sending URLs of custom Fusion Tables in Ajax get reuqests
-var dataURL = 'https://www.googleapis.com/fusiontables/v1/query?sql=SELECT+*+FROM+1Fdf_ij_1hwRYnNXlPVscHKopJjA5IgbnrkyCY6ED+WHERE+DATE>='
-var dataKey = '&key=AIzaSyB-QJux9WIJmey5IJYzPImNzg-xP1gpvU8'
+var dataURL = "https://www.googleapis.com/fusiontables/v1/query?sql=SELECT+*+FROM+1Fdf_ij_1hwRYnNXlPVscHKopJjA5IgbnrkyCY6ED+WHERE+DATE>='"
+var dataKey = "&key=AIzaSyB-QJux9WIJmey5IJYzPImNzg-xP1gpvU8"
+
+//loadGoog is fired when everything is loaded and loads the Google Viz library
+function loadGoog() {
+	google.load("visualization", "1", {
+		packages : ["corechart"],
+		callback : 'getData'
+	});
+}
+
+//getData is fired when the Google Viz library is loaded. It will get the data and call a function to draw the chart
+function getData() {
+	var defaultDate = '1960';
+	//var defaultEnd = '2014';
+	
+	$(".btn").on("click",clickHandler);
+	
+	$("#str_"+defaultDate).click();
+	//$("#end_"+defaultEnd).click();
+
+}
+
+// clickHandler asks for different data based on the button that is clicked
+function clickHandler(e){
+	var parID = $(this).parent().attr('id');
+	//if (parID == 'strbtn'){
+	var dateID = e.target.id;
+	var dateString = dateID.split("_")[1];	
+	//} else {
+	//	var endID = e.target.id;
+	//	var endYr = endID.split("_")[1];
+	//}
+	$.get(dataURL+dateString+"-01-01'"+dataKey, drawChart, 'json');
+}
 
 //drawChart function formats the data and draws the chart
 function drawChart(trezData) {
@@ -25,9 +58,11 @@ function drawChart(trezData) {
 	dataHeaders = ['Date', 'Treasury Rate'];
 	dataArray.push(dataHeaders);
 	dataObj = trezData.rows;
+	
 	//Iterator will format each row
 	for (var i = 0; i < dataObj.length; i++) {
 		currObj = dataObj[i];
+		
 		//Momment.js will change the date string to an actual date, which is better for manipulation
 		currDate = currObj[0];
 		momDate = moment(currDate);
@@ -52,62 +87,33 @@ function drawChart(trezData) {
 		pattern : ['#.#%']
 	});
 	formatVal.format(data, 1);
+	var chartFont = '"Helvetica Neue",Helvetica,Arial,sans-serif';
 	var options = {
 		curveType : 'function',
 		hAxis : {
 			title : 'Date',
 			titleTextStyle : {
-				fontName : '"Helvetica Neue",Helvetica,Arial,sans-serif'
+				fontName : chartFont
 			},
 			textStyle : {
-				fontName : '"Helvetica Neue",Helvetica,Arial,sans-serif'
+				fontName : chartFont
 			}
 		},
 		vAxis : {
 			title : '10-year Treasury Rate',
 			titleTextStyle : {
-				fontName : '"Helvetica Neue",Helvetica,Arial,sans-serif'
+				fontName : chartFont
 			},
 			textStyle : {
-				fontName : '"Helvetica Neue",Helvetica,Arial,sans-serif'
+				fontName : chartFont
 			},
 			format : '##%'
 		},
-		height : 400
+		height : 420
 	};
 	var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 	chart.draw(data, options);
 
-}
-
-// clickHandler asks for different data based on the button that is clicked
-function clickHandler(e){
-	var parID = $(this).parent().attr('id');
-	if (parID == 'strbtn'){
-		var strID = e.target.id;
-		var strYr = strID.split("_")[1];
-	} else {
-		var endID = e.target.id;
-		var endYr = endID.split("_")[1];
-	}
-	$.get(dataURL+strYr+'+AND+DATE<='+endYr+dataKey, drawChart, 'json');
-}
-
-//getData is fired when the Google Viz library is loaded. It will get the data and call a function to draw the chart
-function getData() {
-	var strDefault = '1960';
-	var endDefault = '2014';
-	$(".btn").on("click",clickHandler);
-	$("#str_"+strDefault);
-	$("#end+"+endDefault);
-}
-
-//loadGoog is fired when everything is loaded and loads the Google Viz library
-function loadGoog() {
-	google.load("visualization", "1", {
-		packages : ["corechart"],
-		callback : 'getData'
-	});
 }
 
 //When everything is loaded, this function sets the script in motion by calling certain functions
