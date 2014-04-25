@@ -39,7 +39,6 @@ function getData() {
 	//If there is no query string, the start date will default to 1962; otherwise, it will use the year in the query string
 	if (!queryString){
 		defaultDate = '1962';	
-		console.log('no query string')
 	} else {		
 		var urlDate = queryString.split("=")[1];
 		defaultDate = urlDate;
@@ -76,8 +75,6 @@ function clickHandler(e){
 function drawChart(trezData) {
 	//Data formatter
 	dataArray = [];
-	dataHeaders = ['Date', 'Treasury Rate'];
-	dataArray.push(dataHeaders);
 	dataObj = trezData.rows;
 	
 	//Iterator will format each row
@@ -93,11 +90,15 @@ function drawChart(trezData) {
 		currVal = currObj[1];
 		newVal = currVal / 100;
 
-		//Creates formatted array to use with the Google charting library
-		newArray = [newDate, newVal];
+		//Creates formatted array to use with the Google charting library. currObj[2] is the annotations column.
+		newArray = [newDate, newVal, currObj[2]];
 		dataArray.push(newArray);
 	}
-	var data = google.visualization.arrayToDataTable(dataArray);
+	var data = new google.visualization.DataTable();
+	data.addColumn('date','DATE');
+	data.addColumn('number','Treasury Rate');
+	data.addColumn({type:'string', role:'annotation'});
+	data.addRows(dataArray);
 
 	//These two formats format how the data is displayed in the tooltips
 	var formatDate = new google.visualization.DateFormat({
@@ -108,7 +109,7 @@ function drawChart(trezData) {
 		pattern : ['#.#%']
 	});
 	formatVal.format(data, 1);
-	var chartFont = '"Helvetica Neue",Helvetica,Arial,sans-serif';
+	var chartFont = 'Helvetica';
 	var options = {
 		curveType : 'function',
 		hAxis : {
@@ -130,7 +131,14 @@ function drawChart(trezData) {
 			},
 			format : '##%'
 		},
-		height : 440
+		height : 440,
+		annotations: {
+			textStyle: {
+				color: 'red',
+				fontName: chartFont
+			},
+			//isHtml: true
+		}
 	};
 	var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 	chart.draw(data, options);
